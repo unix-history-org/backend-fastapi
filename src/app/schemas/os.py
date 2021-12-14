@@ -21,9 +21,9 @@ class OS(BaseModel):
 
 
 class OSDatabase(OS):
-    is_active: bool
     start_config: Optional[str]
     stop_config: Optional[str]
+    template_disk_path: Optional[str]
     emulation_type: Optional[EmuType]
 
 

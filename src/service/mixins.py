@@ -21,6 +21,7 @@ class ServiceCreateMixin:
 class ServiceUpdateMixin:
     async def update(self, params: dict) -> dict:
         filters = {self.id_key: self.obj_id}
+        del params["id"]
         obj = await self.database.update(self.model_name, filters, params)
         return self._append_id_object(obj)
 

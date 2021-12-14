@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = 'unix-history.org backend'
     VERSION: str = '2.0.0'
 
+    BASE_URL: str = "localhost:8080"
+
     DATABASE_URL: Optional[str] = None
     MONGO_INITDB_DATABASE: Optional[str] = None
 
