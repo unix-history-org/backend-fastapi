@@ -2,6 +2,6 @@ from enum import IntEnum
 
 
 class EmuType(IntEnum):
-    disable = -1
-    qemu = 0
-    pdp11 = 1
+    DISABLE = -1
+    QEMU = 0
+    PDP11 = 1

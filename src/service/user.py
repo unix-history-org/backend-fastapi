@@ -1,76 +1,110 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 from src.app.core.db.base_layer import AbstractDatabaseLayer
 from src.service.base import BaseService
 from src.service.mixins import ServiceCRUDMixin
-import src.service.token
 from src.cryptography.cryptography import Crypto
 
 
 class UserService(ServiceCRUDMixin, BaseService):
-    def __init__(self, obj_id: Optional[str] = None, *, database: AbstractDatabaseLayer) -> None:
+    def __init__(
+        self, obj_id: Optional[str] = None, *, database: AbstractDatabaseLayer
+    ) -> None:
         super().__init__(obj_id, database=database)
-        self.model_name = 'user'
-        self.user = None
-        self.user_login = None
-        self.password = None
-        self.hash_password = None
+        self.model_name = "user"
+        self._user = None
+        self._user_login = None
+        self._password = None
+        self._hash_password = None
+        self._token = None
+        self._is_admin = None
 
-    async def _set_user_info(self, params):
-        self.user_login = params.get('login')
-        self.user = await self.database.get(self.model_name, filters={"login": self.user_login})
-        self.password = params.get('password')
-        self.hash_password = Crypto.full_passwd(self.password)
-        self.token = Crypto.gen_token_for_auth(self.user_login)
-        self.is_admin = params.get('is_admin') or False
+    async def _set_user_info(self, params: dict) -> None:
+        self._user_login = params.get("login")
+        self._user = await self.database.get(
+            self.model_name, filters={"login": self._user_login}
+        )
+        self._password = params.get("password")
+        self._hash_password = Crypto.full_passwd(self._password)
+        self._token = Crypto.gen_token_for_auth(self._user_login)
+        self._is_admin = params.get("is_admin") or False
 
     async def _create_token(self):
-        await src.service.token.TokenService(database=self.database).create(
-            {
-                'token': self.token,
-                'user_id': self.user['_id']
-            }
+        await TokenService(database=self.database).create(
+            {"token": self._token, "user_id": self._user["id"]}
         )
 
-    async def register(self, params):
+    async def _prepare_data_to_send(self):
+        del self._user["password"]
+
+    async def login_or_create(self, params: dict, login: bool) -> Tuple[dict, str]:
         await self._set_user_info(params)
-        if self.user is None:
-            ret = await self.database.create(self.model_name, {
-                "login": self.user_login,
-                "password": self.hash_password,
-                "is_admin": self.is_admin
-            })
-            self.user = ret
-        else:
-            return {
-                "detail": "User exist"
-            }, ""
+        if login:
+            return await self.login()
+
+        return await self.create()
+
+    async def create(self, params: Optional[dict] = None) -> Tuple[dict, str]:
+        if self._user is not None:
+            return {"detail": "User exist"}, ""
+
+        self._user = await self.database.create(
+            self.model_name,
+            {
+                "login": self._user_login,
+                "password": self._hash_password,
+                "is_admin": self._is_admin,
+            },
+        )
+
         await self._create_token()
-        del ret['password']
-        return self._append_id_object(ret), self.token
+        await self._prepare_data_to_send()
 
-    async def login(self, params):
-        await self._set_user_info(params)
-        if self.user is not None:
-            if Crypto.is_correct_password(self.user['password'], self.password):
-                await self._create_token()
-            else:
-                return {
-                           "detail": "Wrong password"
-                       }, ""
-        else:
-            return {
-                       "detail": "User doesn't exist"
-                   }, ""
-        ret = self.user
-        del ret['password']
-        return self._append_id_object(ret), self.token
+        return self._user, self._token
 
-    async def logout(self, token):
-        return await src.service.token.TokenService(database=self.database).remove(token)
+    async def login(self) -> Tuple[dict, str]:
+        if self._user is None:
+            return {"detail": "User doesn't exist"}, ""
 
-    async def set_admin(self):
-        return await self.update({"is_admin": True})
+        if not Crypto.is_correct_password(self._user["password"], self._password):
+            return {"detail": "Wrong password"}, ""
 
-    async def unset_admin(self):
-        return await self.update({"is_admin": False})
+        await self._create_token()
+        await self._prepare_data_to_send()
+
+        return self._user, self._token
+
+    async def logout(self, token: str) -> bool:
+        return await TokenService(database=self.database).remove(token)
+
+    async def set_admin(self, is_admin=True) -> dict:
+        return await self.update({"is_admin": is_admin})
+
+
+class TokenService(ServiceCRUDMixin, BaseService):
+    def __init__(
+        self, obj_id: Optional[str] = None, *, database: AbstractDatabaseLayer
+    ) -> None:
+        super().__init__(obj_id, database=database)
+        self.model_name = "token"
+        self.token = None
+
+    async def remove(self, token: str = None) -> bool:
+        token = await self.database.get(self.model_name, filters={"token": token})
+        if token is not None:
+            self.obj_id = token["id"]
+            return await super().remove()
+        return False
+
+    async def check_token(self, token: str) -> bool:
+        self.token = await self.database.get(self.model_name, filters={"token": token})
+        return self.token is not None
+
+    async def check_token_and_check_permission(self, token: str) -> bool:
+        valid_token = await self.check_token(token)
+        if not valid_token:
+            return False
+        user = await UserService(self.token["user_id"], database=self.database).get()
+        if user is None:
+            return False
+        return user["is_admin"]

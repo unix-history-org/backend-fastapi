@@ -29,7 +29,7 @@ class Crypto:
         )
 
     @staticmethod
-    def gen_token_for_auth(user_id: int) -> str:  # TODO: I hope its secure?
+    def gen_token_for_auth(user_id: int) -> str:
         tmp_hash = hashlib.sha3_512()
         tmp_hash.update(str.encode(f"{str(user_id)}{str(datetime.datetime.now())}"))
         return tmp_hash.hexdigest()
@@ -52,7 +52,7 @@ class Crypto:
         )
 
     @staticmethod
-    def gen_token_for_reset_pass(user_login: str) -> str:  # TODO: I hope its secure?
+    def gen_token_for_reset_pass(user_login: str) -> str:
         tmp_hash = hashlib.sha3_512()
         tmp_hash.update(str.encode(f"{str(user_login)}{str(datetime.datetime.now())}"))
         return tmp_hash.hexdigest()

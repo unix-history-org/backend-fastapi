@@ -8,7 +8,6 @@ from typing import (
 
 
 class AbstractDatabaseLayer(ABC):
-
     @abstractmethod
     async def get(self, name: str, filters: dict) -> Optional[dict]:
         ...

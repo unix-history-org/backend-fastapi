@@ -1,0 +1,4 @@
+#!/bin/sh
+
+black .
+pylint src > lint.txt

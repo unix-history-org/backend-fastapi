@@ -18,6 +18,8 @@ class OS(BaseModel):
     photos: Optional[List[Images]]
     parent_id: Optional[List[MongoID]]
     child_id: Optional[List[MongoID]]
+    is_free: bool
+    can_downloaded_raw: bool
 
 
 class OSDatabase(OS):

@@ -10,10 +10,7 @@ from src.settings import settings
 from src.app.core.db.connection import connect, disconnect
 
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.VERSION
-)
+app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
 
 app.include_router(admin_os_router)
 app.include_router(admin_user_router)
@@ -22,11 +19,11 @@ app.include_router(user_router)
 app.include_router(emulation_router)
 
 
-@app.on_event('startup')
+@app.on_event("startup")
 async def startup():
     await connect()
 
 
-@app.on_event('shutdown')
+@app.on_event("shutdown")
 async def shutdown():
     await disconnect()
