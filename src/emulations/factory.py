@@ -28,15 +28,11 @@ class QEMUCreation(EmuFactory):  # pylint: disable=R0903
         self, emu_type: str, emu_id: str, **parametric
     ) -> Optional[EmuInterface]:
         if not (
-            self.os_from_db["terminal_enable"]
-            and emu_type == "cli"
-            or self.os_from_db["graphics_enable"]
-            and emu_type == "gui"
-            or (
-                self.os_from_db["graphics_enable"]
-                or self.os_from_db["terminal_enable"]
-                and emu_type == "any"
-            )
+            self.os_from_db["terminal_enable"] and emu_type == "cli"
+            or
+            self.os_from_db["graphics_enable"] and emu_type == "gui"
+            or
+            (self.os_from_db["graphics_enable"] or self.os_from_db["terminal_enable"]) and emu_type == "any"
         ):
             return None
 

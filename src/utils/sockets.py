@@ -52,6 +52,7 @@ class ConnectionManager:
                 pass
             self.disconnect(websocket)
             return False
+        return True
 
 
 manager = ConnectionManager()

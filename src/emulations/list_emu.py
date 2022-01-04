@@ -11,7 +11,7 @@ class ListEmuSingleton:
     _lock: Lock = Lock()
     _list_emu_and_ttl_and_id: list = []
     _th = None
-    _life_time = 60 * 2  # INFO: 15 минут жизни
+    _life_time = 60 * 15  # INFO: 15 минут жизни
 
     def __init__(self) -> None:
         if self._th is None:
@@ -32,8 +32,9 @@ class ListEmuSingleton:
 
     def find(self, _id: str | int) -> Optional[EmuInterface]:
         for emu_and_ttl_and_id in self._list_emu_and_ttl_and_id:
-            if emu_and_ttl_and_id[2] == _id:
-                return emu_and_ttl_and_id[0]
+            emu, _, emu_id = emu_and_ttl_and_id
+            if emu_id == _id:
+                return emu
         return None
 
     @classmethod

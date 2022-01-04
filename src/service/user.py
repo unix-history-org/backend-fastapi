@@ -27,9 +27,9 @@ class UserService(ServiceCRUDMixin, BaseService):
         self._password = params.get("password")
         self._hash_password = Crypto.full_passwd(self._password)
         self._token = Crypto.gen_token_for_auth(self._user_login)
-        self._is_admin = params.get("is_admin") or False
+        self._is_admin = params.get("is_admin", False)
 
-    async def _create_token(self):
+    async def _create_token(self):  # TODO: Вынести в юз кейс
         await TokenService(database=self.database).create(
             {"token": self._token, "user_id": self._user["id"]}
         )
@@ -37,16 +37,10 @@ class UserService(ServiceCRUDMixin, BaseService):
     async def _prepare_data_to_send(self):
         del self._user["password"]
 
-    async def login_or_create(self, params: dict, login: bool) -> Tuple[dict, str]:
+    async def create(self, params: Optional[dict] = None) -> Tuple[Optional[dict], Optional[str], Optional[dict]]:
         await self._set_user_info(params)
-        if login:
-            return await self.login()
-
-        return await self.create()
-
-    async def create(self, params: Optional[dict] = None) -> Tuple[dict, str]:
         if self._user is not None:
-            return {"detail": "User exist"}, ""
+            return None, None, {"detail": "User exists"}
 
         self._user = await self.database.create(
             self.model_name,
@@ -60,19 +54,20 @@ class UserService(ServiceCRUDMixin, BaseService):
         await self._create_token()
         await self._prepare_data_to_send()
 
-        return self._user, self._token
+        return self._user, self._token, None
 
-    async def login(self) -> Tuple[dict, str]:
+    async def login(self, params: Optional[dict] = None) -> Tuple[Optional[dict], Optional[str], Optional[dict]]:
+        await self._set_user_info(params)
         if self._user is None:
-            return {"detail": "User doesn't exist"}, ""
+            return None, None, {"detail": "User doesn't exist"}
 
         if not Crypto.is_correct_password(self._user["password"], self._password):
-            return {"detail": "Wrong password"}, ""
+            return None, None, {"detail": "Wrong password"}
 
         await self._create_token()
         await self._prepare_data_to_send()
 
-        return self._user, self._token
+        return self._user, self._token, None
 
     async def logout(self, token: str) -> bool:
         return await TokenService(database=self.database).remove(token)
