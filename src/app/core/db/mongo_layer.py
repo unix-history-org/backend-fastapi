@@ -78,9 +78,9 @@ class MongoDBDatabaseLayer(AbstractDatabaseLayer):
     @staticmethod
     async def _convert_filters_value(key: str, value: Any) -> Any:
         if "_id" in key or "id" in key:
-            if type(value) == str:
+            if isinstance(value, str):
                 return ObjectId(value)
-            if type(value) == list:
+            if isinstance(value, list):
                 return [ObjectId(value_one) for value_one in value]
         return value
 
@@ -96,9 +96,9 @@ class MongoDBDatabaseLayer(AbstractDatabaseLayer):
             return obj
         obj_id = {"id": str(obj.pop(self.id_key, "none"))}
         for key, value in obj.items():
-            if type(value) == ObjectId:
+            if isinstance(value, ObjectId):
                 obj[key] = self._convert_obj_id_to_str(value)
-            if type(value) == list:
+            if isinstance(value, list):
                 obj[key] = self._convert_list_obj_id_to_list_str(value)
 
         return obj | obj_id
@@ -108,8 +108,8 @@ class MongoDBDatabaseLayer(AbstractDatabaseLayer):
         return str(value)
 
     @staticmethod
-    def _convert_list_obj_id_to_list_str(values: List[ObjectId]) -> List[str]:
-        if type(values[0]) != ObjectId:
+    def _convert_list_obj_id_to_list_str(values: List[ObjectId | str]) -> List[str]:
+        if len(values) == 0 or not isinstance(values[0], ObjectId):
             return values
         ret = []
         for value in values:

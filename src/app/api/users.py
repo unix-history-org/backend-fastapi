@@ -1,19 +1,18 @@
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Cookie
+from fastapi.responses import JSONResponse
 
 from src.app.core.db.mongo_layer import MongoDBDatabaseLayer
 from src.app.schemas.users import UserResponse, UserCreation
-from fastapi.responses import JSONResponse
-
 from src.service.user import UserService
 
 router = APIRouter(prefix="/api/user")
 
 
-async def login_or_create(params: UserCreation, login: bool) -> JSONResponse:
+async def login_or_create(params: UserCreation, login_flag: bool) -> JSONResponse:
     service = UserService(database=MongoDBDatabaseLayer())
-    content, token = await service.login_or_create(params.dict(), login)
+    content, token = await service.login_or_create(params.dict(), login_flag)
     if "detail" in content:
         raise HTTPException(status_code=401, detail=content["detail"])
     response = JSONResponse(content=content)

@@ -27,3 +27,11 @@ class EmuInterface(ABC):
     @abstractmethod
     def stop(self) -> None:
         ...
+
+    @abstractmethod
+    def get_id(self) -> str | int:
+        ...
+
+    @abstractmethod
+    def get_urls(self) -> dict:
+        ...

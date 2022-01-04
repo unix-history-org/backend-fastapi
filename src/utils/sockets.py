@@ -1,6 +1,5 @@
 import asyncio
-from functools import wraps
-from typing import List, Callable, Any
+from typing import List
 
 from starlette.websockets import WebSocket
 
@@ -15,9 +14,8 @@ class ConnectionManager:
         await websocket.accept()
         self.active_connections.append(websocket)
 
-    def disconnect(self, websocket: WebSocket, emu: EmuInterface) -> None:
+    def disconnect(self, websocket: WebSocket) -> None:
         self.active_connections.remove(websocket)
-        emu.stop()
 
     @staticmethod
     async def send_text(message: str, websocket: WebSocket) -> None:
@@ -39,7 +37,7 @@ class ConnectionManager:
             return
 
         if data["type"] == "websocket.disconnect":
-            self.disconnect(websocket, emu)
+            self.disconnect(websocket)
             return
 
         text = data.get("text")
@@ -52,7 +50,7 @@ class ConnectionManager:
                 await self.send_text("Your time is out...", websocket)
             except RuntimeError:
                 pass
-            self.disconnect(websocket, emu)
+            self.disconnect(websocket)
             return False
 
 

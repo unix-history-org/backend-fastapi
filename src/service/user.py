@@ -89,7 +89,9 @@ class TokenService(ServiceCRUDMixin, BaseService):
         self.model_name = "token"
         self.token = None
 
-    async def remove(self, token: str = None) -> bool:
+    async def remove(  # pylint: disable=W1113,W0221
+        self, token: str = None, *args, **kwargs
+    ) -> bool:
         token = await self.database.get(self.model_name, filters={"token": token})
         if token is not None:
             self.obj_id = token["id"]
