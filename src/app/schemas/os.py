@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 from src.app.schemas.base import MongoID
 from src.app.schemas.images import Images
@@ -12,10 +12,12 @@ class OS(BaseModel):
     name: str
     version: str
     vendor: str
+    short_description: str = Field(alias="shortDescription")
     full_description: str = Field(alias="fullDescription")
     terminal_enable: bool = Field(alias="terminalEnable")
     graphics_enable: bool = Field(alias="graphicsEnable")
     photos: Optional[List[Images]]
+    main_photo: Optional[HttpUrl] = Field(alias="mainPhoto")
     parent_id: Optional[List[MongoID]] = Field(alias="parentId")
     child_id: Optional[List[MongoID]] = Field(alias="childId")
     is_free: bool = Field(alias="isFree")

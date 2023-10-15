@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.app.api.admin.users import router as admin_user_router
 from src.app.api.admin.os import router as admin_os_router
@@ -11,6 +12,14 @@ from src.app.core.db.connection import connect, disconnect
 
 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(admin_os_router)
 app.include_router(admin_user_router)
