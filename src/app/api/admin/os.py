@@ -3,7 +3,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Cookie
 
 from src.app.core.db.mongo_layer import MongoDBDatabaseLayer
-from src.app.schemas.os import OSAdmin, OSDatabase
+from src.app.schemas.os import OSAdmin, OSDatabase, OSAdminPatch
 from src.app.schemas.base import MongoID
 from src.service.os import OSService
 from src.utils.tokens import check_token
@@ -36,17 +36,21 @@ async def create_admin_os(
     return await service.create(params.dict())
 
 
-@router.put("/", response_model=OSAdmin, status_code=200)
-async def update_admin_os(params: OSAdmin, token: Optional[str] = Cookie(None)) -> dict:
+@router.put("/{os_id}", response_model=OSAdmin, status_code=200)
+async def update_admin_os(
+    os_id: str,
+    params: OSAdminPatch,
+    token: Optional[str] = Cookie(None)
+) -> dict:
     await check_token(token)
-    os_id = params.id
     service = OSService(os_id, database=MongoDBDatabaseLayer())
-    return await service.update(params.dict())
+    return await service.update(params.dict(exclude_unset=True))
 
 
-@router.delete("/", response_model=bool, status_code=200)
+@router.delete("/{os_id}", response_model=bool, status_code=200)
 async def remove_admin_os(
-    os_id: Optional[str], token: Optional[str] = Cookie(None)
+    os_id: str,
+    token: Optional[str] = Cookie(None)
 ) -> bool:
     await check_token(token)
     service = OSService(os_id, database=MongoDBDatabaseLayer())

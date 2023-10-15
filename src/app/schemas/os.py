@@ -45,5 +45,18 @@ class OSAdmin(OSDatabase, IDModelMixin):
     ...
 
 
+class OSAdminPatch(OSDatabase, IDModelMixin):
+    id: Optional[MongoID]
+    name: Optional[str]
+    version: Optional[str]
+    vendor: Optional[str]
+    short_description: Optional[str] = Field(alias="shortDescription")
+    full_description: Optional[str] = Field(alias="fullDescription")
+    terminal_enable: Optional[bool] = Field(alias="terminalEnable")
+    graphics_enable: Optional[bool] = Field(alias="graphicsEnable")
+    is_free: Optional[bool] = Field(alias="isFree")
+    can_downloaded_raw: Optional[bool] = Field(alias="canDownloadedRaw")
+
+
 OSMulti = OSResponse | List[OSResponse]
 OSAdminMulti = OSAdmin | List[OSAdmin]
