@@ -9,3 +9,7 @@ class Emulation(BaseModel):
     terminal: Optional[AnyUrl]
     graphical: Optional[AnyUrl]
     graphical_type: Optional[GraphicalTypes] = Field(alias="graphicalType")
+
+    class Config:
+        allow_population_by_field_name = True
+

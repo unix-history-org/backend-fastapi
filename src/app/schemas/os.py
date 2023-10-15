@@ -21,12 +21,18 @@ class OS(BaseModel):
     is_free: bool = Field(alias="isFree")
     can_downloaded_raw: bool = Field(alias="canDownloadedRaw")
 
+    class Config:
+        allow_population_by_field_name = True
+
 
 class OSDatabase(OS):
     start_config: Optional[str] = Field(alias="startConfig")
     stop_config: Optional[str] = Field(alias="stopConfig")
     template_disk_path: Optional[str] = Field(alias="templateDiskPath")
     emulation_type: Optional[EmuType] = Field(alias="emulationType")
+
+    class Config:
+        allow_population_by_field_name = True
 
 
 class OSResponse(OS, IDModelMixin):
