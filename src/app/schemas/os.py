@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.app.schemas.base import MongoID
 from src.app.schemas.images import Images
@@ -12,21 +12,21 @@ class OS(BaseModel):
     name: str
     version: str
     vendor: str
-    full_description: str
-    terminal_enable: bool
-    graphics_enable: bool
+    full_description: str = Field(alias="fullDescription")
+    terminal_enable: bool = Field(alias="terminalEnable")
+    graphics_enable: bool = Field(alias="graphicsEnable")
     photos: Optional[List[Images]]
-    parent_id: Optional[List[MongoID]]
-    child_id: Optional[List[MongoID]]
-    is_free: bool
-    can_downloaded_raw: bool
+    parent_id: Optional[List[MongoID]] = Field(alias="parentId")
+    child_id: Optional[List[MongoID]] = Field(alias="childId")
+    is_free: bool = Field(alias="isFree")
+    can_downloaded_raw: bool = Field(alias="canDownloadedRaw")
 
 
 class OSDatabase(OS):
-    start_config: Optional[str]
-    stop_config: Optional[str]
-    template_disk_path: Optional[str]
-    emulation_type: Optional[EmuType]
+    start_config: Optional[str] = Field(alias="startConfig")
+    stop_config: Optional[str] = Field(alias="stopConfig")
+    template_disk_path: Optional[str] = Field(alias="templateDiskPath")
+    emulation_type: Optional[EmuType] = Field(alias="emulationType")
 
 
 class OSResponse(OS, IDModelMixin):
