@@ -1,7 +1,7 @@
 import asyncio
 from typing import List
 
-from starlette.websockets import WebSocket
+from starlette.websockets import WebSocket, WebSocketState
 
 from src.emulations.interfaces import EmuInterface
 
@@ -26,13 +26,21 @@ class ConnectionManager:
         await websocket.send_bytes(data)
 
     async def write_to_socket(self, emu: EmuInterface, websocket: WebSocket) -> None:
+        if websocket.application_state == WebSocketState.DISCONNECTED:
+            emu.stop()
+            return
+
         response = await emu.receive_console()
         if response is not None:
             await self.send_text(response, websocket)
 
     async def read_from_socket(self, emu: EmuInterface, websocket: WebSocket) -> None:
+        if websocket.application_state == WebSocketState.DISCONNECTED:
+            emu.stop()
+            return
+
         try:
-            data = await asyncio.wait_for(websocket.receive(), 0.001)
+            data = await asyncio.wait_for(websocket.receive(), 0.1)
         except asyncio.exceptions.TimeoutError:
             return
 
@@ -51,8 +59,8 @@ class ConnectionManager:
             except RuntimeError:
                 pass
             self.disconnect(websocket)
-            return False
-        return True
+            return True
+        return False
 
 
 manager = ConnectionManager()

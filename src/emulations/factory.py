@@ -43,8 +43,10 @@ class QEMUCreation(EmuFactory):  # pylint: disable=R0903
 
 
 async def get_emu(
-    os_id: str, emulations_type: str, emu_id: Optional[str | int], **parametric
+    os_id: Optional[str], emulations_type: str, emu_id: Optional[str | int], **parametric
 ) -> Optional[EmuInterface]:
+    if emu_id and not os_id:
+        return ListEmuSingleton().find(emu_id)
     os_from_db = await OSService(os_id, database=MongoDBDatabaseLayer()).get()
     if os_from_db["emulation_type"] == EmuType.QEMU:
         if emu_id is None:

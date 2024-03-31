@@ -1,3 +1,8 @@
-class MongoID(str):  # Check it for true MongoID
-    min_length = 24
-    max_length = 24
+from pydantic import StringConstraints
+from typing_extensions import Annotated
+
+MongoID = Annotated[
+    str,
+    "MongoID",
+    StringConstraints(max_length=24, min_length=24)
+]

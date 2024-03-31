@@ -17,7 +17,7 @@ class UserDB(UserCreation):
     is_admin: bool = Field(alias="isAdmin", default=False)
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class UserResponse(User, IDModelMixin):
@@ -28,7 +28,7 @@ class UserAdminResponse(User, IDModelMixin):
     is_admin: bool = Field(alias="isAdmin", default=False)
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 UserMulti = UserResponse | List[UserResponse]

@@ -1,8 +1,10 @@
 import os
 import subprocess
+from io import StringIO
 from shutil import copy
 from queue import Queue, Empty
 from threading import Thread
+from typing import Optional
 
 from src.emulations.interfaces import EmuInterface
 from src.emulations.list_emu import ListEmuSingleton
@@ -33,7 +35,9 @@ class QEMU(EmuInterface):  # pylint: disable=R0902
         self._make_fifo()
 
         self._disk_path = (
-            f"/tmp/unix-history/{self._os['name']}_{self._mac_address}.img"
+            "/tmp/unix-history/"
+            f"{self._replace_os_name(self._os['name'])}"
+            f"_{self._mac_address}.img"
         )
         self._copy_disk()
 
@@ -52,23 +56,27 @@ class QEMU(EmuInterface):  # pylint: disable=R0902
         self._read_thread.start()
 
         self._qemu = subprocess.Popen(command.split(" "))  # pylint: disable=R1732
+        self._novnc = None
 
-        novnc_path = os.path.dirname(
-            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        )
-        self._novnc = subprocess.Popen(  # pylint: disable=R1732
-            (
-                f"{novnc_path}/noVNC/utils/novnc_proxy "
-                f"--vnc localhost:{VNC_DEFAULT_PORT + self._vnc_port} "
-                f"--listen {NOVNC_DEFAULT_PORT + self._vnc_port}"
-            ).split(" ")
-        )
+        if self._os.get("graphics_enable"):
+            novnc_path = os.path.dirname(
+                os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            )
+            self._novnc = subprocess.Popen(  # pylint: disable=R1732
+                (
+                    f"{novnc_path}/noVNC/utils/novnc_proxy "
+                    f"--vnc localhost:{VNC_DEFAULT_PORT + self._vnc_port} "
+                    f"--listen {NOVNC_DEFAULT_PORT + self._vnc_port}"
+                ).split(" ")
+            )
 
     def get_id(self) -> str | int:
         return self._mac_address
 
     def get_urls(self) -> dict:
-        ret = {}
+        ret = {
+            "emulation_id": self.get_id()
+        }
         if self._os["terminal_enable"]:
             ret |= {
                 "terminal": f"{settings.WEBSOCKET_TYPE}://{settings.BASE_URL}/"
@@ -82,16 +90,6 @@ class QEMU(EmuInterface):  # pylint: disable=R0902
             }
             ret |= {"graphical_type": GraphicalTypes.IFRAME}
         return ret
-
-    @classmethod
-    def _get_next_port(cls) -> int:
-        if not cls._used_port:
-            cls._used_port.append(1)
-            return 1
-
-        port = cls._used_port[-1] + 1
-        cls._used_port.append(port)
-        return port
 
     def _make_fifo(self) -> None:
         try:
@@ -111,26 +109,39 @@ class QEMU(EmuInterface):  # pylint: disable=R0902
 
     def _thread_reading(self) -> None:
         out = open(  # pylint: disable=R1732
-            f"{self._fifo_name}.out", "r", encoding="UTF-8"
+            f"{self._fifo_name}.out", "r"
         )
         while self._reading:
-            self._queue.put(out.read(1))
+            data = out.read(1)
+            if data == '\n':
+                data += '\r'
+            self._queue.put_nowait(data)
 
     async def receive_console(self) -> str:
-        try:
-            return self._queue.get_nowait()
-        except Empty:
-            pass
+        size = self._queue.qsize()
+        res = StringIO()
+        for _ in range(size):  # Для оптимизации
+            if el := self._get_element():
+                res.write(el)
+                continue
+            break
+        return res.getvalue()
 
     async def send_console(self, data: str) -> None:
         with open(f"{self._fifo_name}.in", "w", encoding="UTF-8") as inp:
-            inp.writelines(data)
+            inp.write(data)
 
     async def receive_gui(self) -> bytes:
         raise NotImplementedError()
 
     async def send_gui(self, data: bytes) -> None:
         raise NotImplementedError()
+
+    def _get_element(self) -> Optional[str]:
+        try:
+            return self._queue.get_nowait()
+        except Empty:
+            return None
 
     def _delete_files(self) -> None:
         try:
@@ -171,3 +182,17 @@ class QEMU(EmuInterface):  # pylint: disable=R0902
 
     def __del__(self) -> None:
         self.stop()
+
+    @classmethod
+    def _get_next_port(cls) -> int:
+        if not cls._used_port:
+            cls._used_port.append(1)
+            return 1
+
+        port = cls._used_port[-1] + 1
+        cls._used_port.append(port)
+        return port
+
+    @staticmethod
+    def _replace_os_name(os_name: str) -> str:
+        return os_name.replace(" ", "_")

@@ -31,8 +31,7 @@ class ListEmuSingleton:
             self._list_emu_and_ttl_and_id.append([emu, self._life_time, emu.get_id()])
 
     def find(self, _id: str | int) -> Optional[EmuInterface]:
-        for emu_and_ttl_and_id in self._list_emu_and_ttl_and_id:
-            emu, _, emu_id = emu_and_ttl_and_id
+        for emu, _, emu_id in self._list_emu_and_ttl_and_id:
             if emu_id == _id:
                 return emu
         return None
