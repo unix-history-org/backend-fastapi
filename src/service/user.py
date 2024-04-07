@@ -29,7 +29,7 @@ class UserService(ServiceCRUDMixin, BaseService):
         self._token = Crypto.gen_token_for_auth(self._user_login)
         self._is_admin = params.get("is_admin", False)
 
-    async def _create_token(self):  # TODO: Вынести в юз кейс
+    async def _create_token(self):
         await TokenService(database=self.database).create(
             {"token": self._token, "user_id": self._user["id"]}
         )
@@ -37,7 +37,9 @@ class UserService(ServiceCRUDMixin, BaseService):
     async def _prepare_data_to_send(self):
         del self._user["password"]
 
-    async def create(self, params: Optional[dict] = None) -> Tuple[Optional[dict], Optional[str], Optional[dict]]:
+    async def create(
+        self, params: Optional[dict] = None
+    ) -> Tuple[Optional[dict], Optional[str], Optional[dict]]:
         await self._set_user_info(params)
         if self._user is not None:
             return None, None, {"detail": "User exists"}
@@ -56,7 +58,9 @@ class UserService(ServiceCRUDMixin, BaseService):
 
         return self._user, self._token, None
 
-    async def login(self, params: Optional[dict] = None) -> Tuple[Optional[dict], Optional[str], Optional[dict]]:
+    async def login(
+        self, params: Optional[dict] = None
+    ) -> Tuple[Optional[dict], Optional[str], Optional[dict]]:
         await self._set_user_info(params)
         if self._user is None:
             return None, None, {"detail": "User doesn't exist"}

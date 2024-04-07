@@ -38,9 +38,7 @@ async def create_admin_os(
 
 @router.put("/{os_id}", response_model=OSAdmin, status_code=200)
 async def update_admin_os(
-    os_id: str,
-    params: OSAdminPatch,
-    token: Optional[str] = Cookie(None)
+    os_id: str, params: OSAdminPatch, token: Optional[str] = Cookie(None)
 ) -> dict:
     await check_token(token)
     service = OSService(os_id, database=MongoDBDatabaseLayer())
@@ -48,10 +46,7 @@ async def update_admin_os(
 
 
 @router.delete("/{os_id}", response_model=bool, status_code=200)
-async def remove_admin_os(
-    os_id: str,
-    token: Optional[str] = Cookie(None)
-) -> bool:
+async def remove_admin_os(os_id: str, token: Optional[str] = Cookie(None)) -> bool:
     await check_token(token)
     service = OSService(os_id, database=MongoDBDatabaseLayer())
     return await service.remove()

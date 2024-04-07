@@ -1,7 +1,7 @@
 import asyncio
 from typing import List
 
-from starlette.websockets import WebSocket, WebSocketState
+from starlette.websockets import WebSocket
 
 from src.emulations.interfaces import EmuInterface
 
@@ -18,39 +18,58 @@ class ConnectionManager:
         self.active_connections.remove(websocket)
 
     @staticmethod
-    async def send_text(message: str, websocket: WebSocket) -> None:
-        await websocket.send_text(message)
+    async def send_text(message: str, websocket: WebSocket, ping: bool = False) -> None:
+        if not ping:
+            await websocket.send_text(f"0:{message}")
+        else:
+            await websocket.send_text("1:pong")
 
     @staticmethod
     async def send_binary(data: bytes, websocket: WebSocket) -> None:
         await websocket.send_bytes(data)
 
-    async def write_to_socket(self, emu: EmuInterface, websocket: WebSocket) -> None:
-        if websocket.application_state == WebSocketState.DISCONNECTED:
-            emu.stop()
-            return
+    @staticmethod
+    async def write_gui_to_socket(
+        emu: EmuInterface, websocket: WebSocket
+    ):
+        while True:
+            response = await emu.receive_gui()
+            if response is not None:
+                if isinstance(response, str):
+                    await websocket.send_text(response)
+                if isinstance(response, bytes):
+                    await websocket.send_bytes(response)
+            await asyncio.sleep(0)
 
-        response = await emu.receive_console()
-        if response is not None:
-            await self.send_text(response, websocket)
+    async def read_gui_from_socket(
+        self, emu: EmuInterface, websocket: WebSocket
+    ):
+        async for message in websocket.iter_bytes():
+            await emu.send_gui(message)
+        self.disconnect(websocket)
 
-    async def read_from_socket(self, emu: EmuInterface, websocket: WebSocket) -> None:
-        if websocket.application_state == WebSocketState.DISCONNECTED:
-            emu.stop()
-            return
+    async def write_text_to_socket(
+        self, emu: EmuInterface, websocket: WebSocket
+    ) -> None:
+        while True:
+            response = await emu.receive_console()
+            if response is not None:
+                await self.send_text(response, websocket)
+            await asyncio.sleep(0)
 
-        try:
-            data = await asyncio.wait_for(websocket.receive(), 0.1)
-        except asyncio.exceptions.TimeoutError:
-            return
+    async def read_text_from_socket(
+        self, emu: EmuInterface, websocket: WebSocket
+    ) -> None:
+        async for text in websocket.iter_text():
+            if await self.check_not_alive(emu, websocket):
+                break
+            if text.startswith("1:"):
+                await self.send_text("", websocket, ping=True)
+                continue
 
-        if data["type"] == "websocket.disconnect":
-            self.disconnect(websocket)
-            return
+            await emu.send_console(text[2:])
 
-        text = data.get("text")
-        if text is not None:
-            await emu.send_console(text)
+        self.disconnect(websocket)
 
     async def check_not_alive(self, emu: EmuInterface, websocket: WebSocket) -> bool:
         if not emu.is_alive():

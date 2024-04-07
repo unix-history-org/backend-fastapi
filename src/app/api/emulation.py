@@ -1,6 +1,11 @@
-from asyncio import sleep
+import asyncio
+import multiprocessing
+import threading
+from uuid import UUID
 
 from fastapi import APIRouter, WebSocket, HTTPException
+from starlette.websockets import WebSocketDisconnect
+from websockets import ConnectionClosed
 
 from src.app.schemas.emulation import Emulation
 from src.app.schemas.base import MongoID
@@ -19,7 +24,7 @@ async def start_os(os_id: MongoID) -> dict:
 
 
 @router.get("/stop/{emu_id}", status_code=200)
-async def start_os(emu_id: str) -> bool:
+async def stop_os(emu_id: UUID) -> bool:
     emu = await get_emu(None, emulations_type="any", emu_id=emu_id)
     if emu is not None:
         emu.stop()
@@ -27,8 +32,7 @@ async def start_os(emu_id: str) -> bool:
 
 
 @router.websocket("/{os_id}/{emu_id}/cli")
-async def cli_ws(websocket: WebSocket, os_id: str, emu_id: str) -> None:
-    # TODO: Обрабатывать закрытие сокета
+async def cli_ws(websocket: WebSocket, os_id: str, emu_id: UUID) -> None:
     await manager.connect(websocket)
     emu = await get_emu(os_id, emulations_type="cli", emu_id=emu_id)
 
@@ -36,13 +40,53 @@ async def cli_ws(websocket: WebSocket, os_id: str, emu_id: str) -> None:
         return
 
     await manager.send_text("Running...\n\n\r", websocket)
-    while True:
-        if await manager.check_not_alive(emu, websocket):
-            break
+    thread = threading.Thread(target=asyncio.new_event_loop().run_until_complete, args=(asyncio.wait([
+            asyncio.create_task(manager.write_text_to_socket(emu, websocket)),
+            asyncio.create_task(manager.read_text_from_socket(emu, websocket))
+        ], return_when=asyncio.FIRST_COMPLETED), )
+    )
+    try:
+        thread.start()
+        while True:
+            await asyncio.sleep(0)
+    except (ConnectionClosed, WebSocketDisconnect, RuntimeError):
+        ...
 
-        await manager.write_to_socket(emu, websocket)
+    # emu.stop()
+    thread._stop()
 
-        await manager.read_from_socket(emu, websocket)
 
-    await manager.send_text("Close...", websocket)
-    emu.stop()
+@router.websocket("/{os_id}/{emu_id}/gui")
+async def gui_ws(websocket: WebSocket, os_id: str, emu_id: UUID) -> None:
+    await manager.connect(websocket)
+    emu = await get_emu(os_id, emulations_type="gui", emu_id=emu_id)
+
+    if emu is None:
+        return
+
+    emu.start_gui()
+
+    # thread = threading.Thread(target=asyncio.new_event_loop().run_until_complete, args=(asyncio.wait([
+    #     asyncio.create_task(manager.write_gui_to_socket(emu, websocket)),
+    #     asyncio.create_task(manager.read_gui_from_socket(emu, websocket))
+    # ], return_when=asyncio.FIRST_COMPLETED),)
+    #                           )
+    # try:
+    #     thread.start()
+    #     while True:
+    #         await asyncio.sleep(0)
+    # except (ConnectionClosed, WebSocketDisconnect, RuntimeError):
+    #     ...
+
+    emu.start_gui()
+
+    try:
+        await asyncio.gather(
+            manager.write_gui_to_socket(emu, websocket),
+            manager.read_gui_from_socket(emu, websocket)
+        )#, return_when=asyncio.FIRST_COMPLETED)
+    except (ConnectionClosed, WebSocketDisconnect, RuntimeError):
+        ...
+
+    # emu.stop()
+    # thread._stop()

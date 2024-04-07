@@ -33,5 +33,4 @@ class ServiceRemoveMixin:  # pylint: disable=R0903
 
 class ServiceCRUDMixin(
     ServiceCreateMixin, ServiceGetMixin, ServiceUpdateMixin, ServiceRemoveMixin
-):
-    ...
+): ...

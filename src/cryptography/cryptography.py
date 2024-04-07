@@ -8,7 +8,7 @@ RANDOM_STRING_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234
 
 class Crypto:
     @staticmethod
-    def _hash_passwd(salt: str, passwd: str, iterations: int = 10 ** 5) -> str:
+    def _hash_passwd(salt: str, passwd: str, iterations: int = 10**5) -> str:
         tmp_hash = hashlib.pbkdf2_hmac(
             "sha3_512", passwd.encode("ascii"), salt.encode("ascii"), iterations
         )
@@ -21,7 +21,7 @@ class Crypto:
 
     @staticmethod
     def full_passwd(passwd: str) -> str:
-        iterations = 10 ** 5
+        iterations = 10**5
         salt = Crypto.get_salt()
         return (
             f"pbkdf2_sha3_512${str(iterations)}${salt}"

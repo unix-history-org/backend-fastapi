@@ -22,11 +22,11 @@ class OS(BaseModel):
     child_id: Optional[List[MongoID]] = Field(alias="childId", default=None)
     is_free: bool = Field(alias="isFree")
     can_downloaded_raw: bool = Field(alias="canDownloadedRaw")
-    os_username: str = Field(alias="osUsername", default='uh')
-    os_password: str = Field(alias="osPassword", default='uh')
-    os_root_password: str = Field(alias="osRootPassword", default='uh')
+    os_username: str = Field(alias="osUsername", default="uh")
+    os_password: str = Field(alias="osPassword", default="uh")
+    os_root_password: str = Field(alias="osRootPassword", default="uh")
 
-    class Config:
+    class Config:  # pylint: disable=R0903
         populate_by_name = True
 
 
@@ -35,8 +35,9 @@ class OSDatabase(OS):
     stop_config: Optional[str] = Field(alias="stopConfig", default=None)
     template_disk_path: Optional[str] = Field(alias="templateDiskPath", default=None)
     emulation_type: Optional[EmuType] = Field(alias="emulationType", default=None)
+    lifetime: Optional[int] = Field(default=60*15)
 
-    class Config:
+    class Config:  # pylint: disable=R0903
         populate_by_name = True
 
 

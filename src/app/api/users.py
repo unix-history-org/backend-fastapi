@@ -14,7 +14,9 @@ def get_service():
     return UserService(database=MongoDBDatabaseLayer())
 
 
-def prepare_response(content: Optional[dict], token: Optional[str], error: Optional[dict]) -> JSONResponse:
+def prepare_response(
+    content: Optional[dict], token: Optional[str], error: Optional[dict]
+) -> JSONResponse:
     if error is not None:
         raise HTTPException(status_code=401, detail=error["detail"])
     response = JSONResponse(content=content)
@@ -35,5 +37,7 @@ async def register(params: UserCreation, service=Depends(get_service)) -> JSONRe
 
 
 @router.post("/logout", response_model=bool, status_code=200)
-async def logout(token: Optional[str] = Cookie(None), service=Depends(get_service)) -> bool:
+async def logout(
+    token: Optional[str] = Cookie(None), service=Depends(get_service)
+) -> bool:
     return await service.logout(token)

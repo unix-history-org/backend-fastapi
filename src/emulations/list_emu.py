@@ -1,17 +1,27 @@
 from __future__ import annotations
 
 import time
+from dataclasses import dataclass
 from threading import Lock, Thread
 from typing import Optional
+from uuid import UUID
 
 from src.emulations.interfaces import EmuInterface
+
+_STOP_STEP = 30
+
+
+@dataclass
+class _EmuControl:
+    emu: EmuInterface
+    lifetime: int
+    emu_id: UUID
 
 
 class ListEmuSingleton:
     _lock: Lock = Lock()
-    _list_emu_and_ttl_and_id: list = []
+    _dict_emu_and_ttl_and_id: dict[UUID, _EmuControl] = dict()
     _th = None
-    _life_time = 60 * 15  # INFO: 15 минут жизни
 
     def __init__(self) -> None:
         if self._th is None:
@@ -28,26 +38,31 @@ class ListEmuSingleton:
 
     def append(self, emu: EmuInterface) -> None:
         with self._lock:
-            self._list_emu_and_ttl_and_id.append([emu, self._life_time, emu.get_id()])
+            self._dict_emu_and_ttl_and_id[emu.get_id()] = _EmuControl(
+                emu=emu,
+                lifetime=emu.get_lifetime(),
+                emu_id=emu.get_id()
+            )
 
-    def find(self, _id: str | int) -> Optional[EmuInterface]:
-        for emu, _, emu_id in self._list_emu_and_ttl_and_id:
-            if emu_id == _id:
-                return emu
-        return None
+    def find(self, _id: UUID) -> Optional[EmuInterface]:
+        if emu_control := self._dict_emu_and_ttl_and_id.get(_id):
+            return emu_control.emu
+
+    def remove(self, _id: UUID):
+        self._dict_emu_and_ttl_and_id.pop(_id)
 
     @classmethod
     def _timer(cls) -> None:
         while True:
             emu_stop_list = []
             with cls._lock:
-                for emu_and_ttl_and_id in cls._list_emu_and_ttl_and_id:
-                    emu_and_ttl_and_id[1] -= 30
-                    if emu_and_ttl_and_id[1] < 30:
+                for emu_and_ttl_and_id in cls._dict_emu_and_ttl_and_id.values():
+                    emu_and_ttl_and_id.lifetime -= _STOP_STEP
+                    if emu_and_ttl_and_id.lifetime < _STOP_STEP:
                         emu_stop_list.append(emu_and_ttl_and_id[0])
-                        cls._list_emu_and_ttl_and_id.remove(emu_and_ttl_and_id)
+                        cls._dict_emu_and_ttl_and_id.pop(emu_and_ttl_and_id.emu_id)
             cls.__stop_for_list(emu_stop_list)
-            time.sleep(30)
+            time.sleep(_STOP_STEP)
 
     @staticmethod
     def __stop_for_list(list_stooped: list) -> None:

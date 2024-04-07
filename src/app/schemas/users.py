@@ -16,7 +16,7 @@ class UserCreation(User):
 class UserDB(UserCreation):
     is_admin: bool = Field(alias="isAdmin", default=False)
 
-    class Config:
+    class Config:  # pylint: disable=R0903
         populate_by_name = True
 
 
@@ -27,7 +27,7 @@ class UserResponse(User, IDModelMixin):
 class UserAdminResponse(User, IDModelMixin):
     is_admin: bool = Field(alias="isAdmin", default=False)
 
-    class Config:
+    class Config:  # pylint: disable=R0903
         populate_by_name = True
 
 
