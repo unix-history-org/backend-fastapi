@@ -35,7 +35,7 @@ class OSDatabase(OS):
     stop_config: Optional[str] = Field(alias="stopConfig", default=None)
     template_disk_path: Optional[str] = Field(alias="templateDiskPath", default=None)
     emulation_type: Optional[EmuType] = Field(alias="emulationType", default=None)
-    lifetime: Optional[int] = Field(default=60*15)
+    lifetime: Optional[int] = Field(default=60 * 15)
 
     class Config:  # pylint: disable=R0903
         populate_by_name = True

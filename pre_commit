@@ -1,4 +1,4 @@
 #!/bin/sh
 
-black .
-pylint src > lint.txt
+black . --check | tee black.txt
+pylint src | tee lint.txt

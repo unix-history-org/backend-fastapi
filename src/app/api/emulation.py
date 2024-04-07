@@ -1,6 +1,4 @@
 import asyncio
-import multiprocessing
-import threading
 from uuid import UUID
 
 from fastapi import APIRouter, WebSocket, HTTPException
@@ -11,6 +9,7 @@ from src.app.schemas.emulation import Emulation
 from src.app.schemas.base import MongoID
 from src.emulations.factory import get_emu
 from src.utils.sockets import manager
+from src.utils.stoppable_thread import StoppableThread
 
 router = APIRouter(prefix="/api/emu")
 
@@ -40,10 +39,17 @@ async def cli_ws(websocket: WebSocket, os_id: str, emu_id: UUID) -> None:
         return
 
     await manager.send_text("Running...\n\n\r", websocket)
-    thread = threading.Thread(target=asyncio.new_event_loop().run_until_complete, args=(asyncio.wait([
-            asyncio.create_task(manager.write_text_to_socket(emu, websocket)),
-            asyncio.create_task(manager.read_text_from_socket(emu, websocket))
-        ], return_when=asyncio.FIRST_COMPLETED), )
+    thread = StoppableThread(
+        target=asyncio.new_event_loop().run_until_complete,
+        args=(
+            asyncio.wait(
+                [
+                    asyncio.create_task(manager.write_text_to_socket(emu, websocket)),
+                    asyncio.create_task(manager.read_text_from_socket(emu, websocket)),
+                ],
+                return_when=asyncio.FIRST_COMPLETED,
+            ),
+        ),
     )
     try:
         thread.start()
@@ -52,8 +58,8 @@ async def cli_ws(websocket: WebSocket, os_id: str, emu_id: UUID) -> None:
     except (ConnectionClosed, WebSocketDisconnect, RuntimeError):
         ...
 
-    # emu.stop()
-    thread._stop()
+    emu.stop()
+    thread.stop()
 
 
 @router.websocket("/{os_id}/{emu_id}/gui")
@@ -66,27 +72,24 @@ async def gui_ws(websocket: WebSocket, os_id: str, emu_id: UUID) -> None:
 
     emu.start_gui()
 
-    # thread = threading.Thread(target=asyncio.new_event_loop().run_until_complete, args=(asyncio.wait([
-    #     asyncio.create_task(manager.write_gui_to_socket(emu, websocket)),
-    #     asyncio.create_task(manager.read_gui_from_socket(emu, websocket))
-    # ], return_when=asyncio.FIRST_COMPLETED),)
-    #                           )
-    # try:
-    #     thread.start()
-    #     while True:
-    #         await asyncio.sleep(0)
-    # except (ConnectionClosed, WebSocketDisconnect, RuntimeError):
-    #     ...
-
-    emu.start_gui()
-
+    thread = StoppableThread(
+        target=asyncio.new_event_loop().run_until_complete,
+        args=(
+            asyncio.wait(
+                [
+                    asyncio.create_task(manager.write_gui_to_socket(emu, websocket)),
+                    asyncio.create_task(manager.read_gui_from_socket(emu, websocket)),
+                ],
+                return_when=asyncio.FIRST_COMPLETED,
+            ),
+        ),
+    )
     try:
-        await asyncio.gather(
-            manager.write_gui_to_socket(emu, websocket),
-            manager.read_gui_from_socket(emu, websocket)
-        )#, return_when=asyncio.FIRST_COMPLETED)
+        thread.start()
+        while True:
+            await asyncio.sleep(0)
     except (ConnectionClosed, WebSocketDisconnect, RuntimeError):
         ...
 
-    # emu.stop()
-    # thread._stop()
+    emu.stop()
+    thread.stop()

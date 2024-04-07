@@ -35,8 +35,8 @@ def _retry_decorator(func):
             except OSError as e:
                 error = e
                 await asyncio.sleep(delay)
-        else:
-            raise error
+        raise error
+
     return _wrapper
 
 
@@ -49,18 +49,15 @@ class _WebsockifyProxyWithLogger(WebSocketProxy):  # pylint: disable=R0903
     def get_logger(self):
         return self._logger
 
-    def start_server(self):
-        self._logger = logging.getLogger(self._logger_name)
-        self.logger = self.get_logger()
-        super().start_server()
-
     @staticmethod
     def create_and_run(*args, **kwargs):
         _WebsockifyProxyWithLogger(*args, **kwargs).start_server()
 
 
-class _GuiSocketHelper:
-    def __init__(self, url: str, input_queue: asyncio.Queue, output_queue: asyncio.Queue):
+class _GuiSocketHelper:  # pylint: disable=R0903
+    def __init__(
+        self, url: str, input_queue: asyncio.Queue, output_queue: asyncio.Queue
+    ):
         self._url = url
         self._input_queue = input_queue
         self._output_queue = output_queue
@@ -78,7 +75,9 @@ class _GuiSocketHelper:
             self._websocket = websocket
             read_task = asyncio.create_task(self._read_messages())
             write_task = asyncio.create_task(self._write_messages())
-            _, pending = await asyncio.wait([read_task, write_task], return_when=asyncio.FIRST_COMPLETED)
+            _, pending = await asyncio.wait(
+                [read_task, write_task], return_when=asyncio.FIRST_COMPLETED
+            )
             for task in pending:
                 task.cancel()
 
@@ -141,7 +140,7 @@ class QEMU(EmuInterface):  # pylint: disable=R0902
             self._websockify_init()
 
     def get_lifetime(self) -> int:
-        return self._os.get("lifetime", 60*15)
+        return self._os.get("lifetime", 60 * 15)
 
     def get_id(self) -> UUID:
         return self._uuid
@@ -205,9 +204,9 @@ class QEMU(EmuInterface):  # pylint: disable=R0902
                 "listen_host": "0.0.0.0",
                 "listen_port": NOVNC_DEFAULT_PORT + self._vnc_port,
                 "logger": logging.getLogger(f"WEBSOCKIFY_{self.get_id()}"),
-                "logger_name": f"WEBSOCKIFY_{self.get_id()}"
+                "logger_name": f"WEBSOCKIFY_{self.get_id()}",
             },
-            daemon=False
+            daemon=False,
         )
         self._websockify_process.start()
         self._gui_helper_input_queue = asyncio.Queue()
@@ -272,12 +271,12 @@ class QEMU(EmuInterface):  # pylint: disable=R0902
         copy(self._os["template_disk_path"], self._disk_path)
 
     def _thread_console_reading(self) -> None:
-        out = open(f"{self._fifo_name}.out", "r", encoding="UTF-8")  # pylint: disable=R1732
-        while self._reading:
-            data = out.read(1)
-            if data == "\n":
-                data += "\r"
-            self._queue.put_nowait(data)
+        with open(f"{self._fifo_name}.out", "r", encoding="UTF-8") as out:
+            while self._reading:
+                data = out.read(1)
+                if data == "\n":
+                    data += "\r"
+                self._queue.put_nowait(data)
 
     def _get_element(self) -> Optional[str]:
         try:

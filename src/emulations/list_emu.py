@@ -20,7 +20,7 @@ class _EmuControl:
 
 class ListEmuSingleton:
     _lock: Lock = Lock()
-    _dict_emu_and_ttl_and_id: dict[UUID, _EmuControl] = dict()
+    _dict_emu_and_ttl_and_id: dict[UUID, _EmuControl] = {}
     _th = None
 
     def __init__(self) -> None:
@@ -39,12 +39,10 @@ class ListEmuSingleton:
     def append(self, emu: EmuInterface) -> None:
         with self._lock:
             self._dict_emu_and_ttl_and_id[emu.get_id()] = _EmuControl(
-                emu=emu,
-                lifetime=emu.get_lifetime(),
-                emu_id=emu.get_id()
+                emu=emu, lifetime=emu.get_lifetime(), emu_id=emu.get_id()
             )
 
-    def find(self, _id: UUID) -> Optional[EmuInterface]:
+    def find(self, _id: UUID) -> Optional[EmuInterface]:  # pylint: disable=R1710
         if emu_control := self._dict_emu_and_ttl_and_id.get(_id):
             return emu_control.emu
 

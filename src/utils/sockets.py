@@ -29,9 +29,7 @@ class ConnectionManager:
         await websocket.send_bytes(data)
 
     @staticmethod
-    async def write_gui_to_socket(
-        emu: EmuInterface, websocket: WebSocket
-    ):
+    async def write_gui_to_socket(emu: EmuInterface, websocket: WebSocket):
         while True:
             response = await emu.receive_gui()
             if response is not None:
@@ -41,9 +39,7 @@ class ConnectionManager:
                     await websocket.send_bytes(response)
             await asyncio.sleep(0)
 
-    async def read_gui_from_socket(
-        self, emu: EmuInterface, websocket: WebSocket
-    ):
+    async def read_gui_from_socket(self, emu: EmuInterface, websocket: WebSocket):
         async for message in websocket.iter_bytes():
             await emu.send_gui(message)
         self.disconnect(websocket)

@@ -52,8 +52,8 @@ async def get_emu(
     os_from_db = await OSService(os_id, database=MongoDBDatabaseLayer()).get()
     if os_from_db["emulation_type"] == EmuType.QEMU:
         if emu_id is None:
-            # emu_id = uuid4()
-            emu_id = UUID("00000000-0000-0000-0000-000000000000")
+            emu_id = uuid4()
+            # emu_id = UUID("00000000-0000-0000-0000-000000000000")
         return await QEMUCreation(os_from_db).create(
             emulations_type, emu_id, **parametric
         )
