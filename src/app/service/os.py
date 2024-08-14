@@ -1,8 +1,8 @@
 from typing import Optional
 
 from src.app.core.db.base_layer import AbstractDatabaseLayer
-from src.service.base import BaseService
-from src.service.mixins import ServiceCRUDMixin
+from src.app.service.base import BaseService
+from src.app.service.mixins import ServiceCRUDMixin
 
 
 class OSService(ServiceCRUDMixin, BaseService):

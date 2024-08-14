@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 
 from src.app.core.db.mongo_layer import MongoDBDatabaseLayer
 from src.app.schemas.users import UserResponse, UserCreation
-from src.service.user import UserService
+from src.app.service.user import UserService
 
 router = APIRouter(prefix="/api/user")
 

@@ -3,7 +3,7 @@ from typing import List
 
 from starlette.websockets import WebSocket
 
-from src.emulations.interfaces import EmuInterface
+from src.app.emulations import EmuInterface
 
 
 class ConnectionManager:

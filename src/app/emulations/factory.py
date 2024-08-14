@@ -5,11 +5,11 @@ from typing import Optional
 from uuid import uuid4, UUID
 
 from src.app.core.db.mongo_layer import MongoDBDatabaseLayer
-from src.emulations.interfaces import EmuInterface
-from src.emulations.qemu import QEMU
-from src.emulations.types import EmuType
-from src.service.os import OSService
-from src.emulations.list_emu import ListEmuSingleton
+from src.app.emulations.interfaces import EmuInterface
+from src.app.emulations.qemu import QEMU
+from src.app.emulations.types import EmuType
+from src.app.service.os import OSService
+from src.app.emulations.list_emu import ListEmuSingleton
 
 
 class EmuFactory(ABC):  # pylint: disable=R0903

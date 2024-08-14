@@ -6,7 +6,7 @@ from threading import Lock, Thread
 from typing import Optional
 from uuid import UUID
 
-from src.emulations.interfaces import EmuInterface
+from src.app.emulations.interfaces import EmuInterface
 
 _STOP_STEP = 30
 
@@ -42,12 +42,13 @@ class ListEmuSingleton:
                 emu=emu, lifetime=emu.get_lifetime(), emu_id=emu.get_id()
             )
 
-    def find(self, _id: UUID) -> Optional[EmuInterface]:  # pylint: disable=R1710
-        if emu_control := self._dict_emu_and_ttl_and_id.get(_id):
+    def find(self, emu_id: UUID) -> Optional[EmuInterface]:  # pylint: disable=R1710
+        if emu_control := self._dict_emu_and_ttl_and_id.get(emu_id):
             return emu_control.emu
 
-    def remove(self, _id: UUID):
-        self._dict_emu_and_ttl_and_id.pop(_id)
+    def remove(self, emu_id: UUID):
+        if emu_id in self._dict_emu_and_ttl_and_id:
+            self._dict_emu_and_ttl_and_id.pop(emu_id)
 
     @classmethod
     def _timer(cls) -> None:

@@ -13,9 +13,9 @@ from uuid import UUID
 import websockets
 from websockify.websocketproxy import WebSocketProxy
 
-from src.emulations.interfaces import EmuInterface
-from src.emulations.list_emu import ListEmuSingleton
-from src.emulations.types import GraphicalTypes
+from src.app.emulations.interfaces import EmuInterface
+from src.app.emulations.list_emu import ListEmuSingleton
+from src.app.emulations.types import GraphicalTypes
 from src.settings import settings
 
 NOVNC_DEFAULT_PORT = 6080

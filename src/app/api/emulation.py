@@ -7,7 +7,7 @@ from websockets import ConnectionClosed
 
 from src.app.schemas.emulation import Emulation
 from src.app.schemas.base import MongoID
-from src.emulations.factory import get_emu
+from src.app.emulations.factory import get_emu
 from src.utils.sockets import manager
 from src.utils.stoppable_thread import StoppableThread
 

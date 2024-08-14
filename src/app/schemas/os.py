@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, HttpUrl
 from src.app.schemas.base import MongoID
 from src.app.schemas.images import Images
 from src.app.schemas.mixins import IDModelMixin
-from src.emulations.types import EmuType
+from src.app.emulations.types import EmuType
 
 
 class OS(BaseModel):
