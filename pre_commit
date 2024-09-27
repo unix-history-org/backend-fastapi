@@ -1,4 +1,4 @@
 #!/bin/sh
 
-black . --check | tee black.txt
+black . --check 2>&1 | tee black.txt
 pylint src | tee lint.txt
