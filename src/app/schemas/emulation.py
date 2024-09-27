@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, AnyUrl, Field
 
-from src.app.emulations.types import GraphicalTypes
+from app.emulations.types import GraphicalTypes
 
 
 class Emulation(BaseModel):

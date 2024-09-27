@@ -3,9 +3,9 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Cookie, Depends
 from fastapi.responses import JSONResponse
 
-from src.app.core.db.mongo_layer import MongoDBDatabaseLayer
-from src.app.schemas.users import UserResponse, UserCreation
-from src.app.service.user import UserService
+from app.core.db.mongo_layer import MongoDBDatabaseLayer
+from app.schemas.users import UserResponse, UserCreation
+from app.service.user import UserService
 
 router = APIRouter(prefix="/api/user")
 

@@ -3,9 +3,9 @@ from typing import Optional, Any, List
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorCollection
 
-from src.app.core.db.base_layer import AbstractDatabaseLayer
-from src.app.core.db.mongodb import db
-from src.settings import settings
+from app.core.db.base_layer import AbstractDatabaseLayer
+from app.core.db.mongodb import db
+from settings import settings
 
 
 class MongoDBDatabaseLayer(AbstractDatabaseLayer):

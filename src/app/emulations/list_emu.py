@@ -6,7 +6,7 @@ from threading import Lock, Thread
 from typing import Optional
 from uuid import UUID
 
-from src.app.emulations.interfaces import EmuInterface
+from app.emulations.interfaces import EmuInterface
 
 _STOP_STEP = 30
 

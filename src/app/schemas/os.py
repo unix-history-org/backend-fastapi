@@ -2,10 +2,10 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, HttpUrl
 
-from src.app.schemas.base import MongoID
-from src.app.schemas.images import Images
-from src.app.schemas.mixins import IDModelMixin
-from src.app.emulations.types import EmuType
+from app.schemas.base import MongoID
+from app.schemas.images import Images
+from app.schemas.mixins import IDModelMixin
+from app.emulations.types import EmuType
 
 
 class OS(BaseModel):

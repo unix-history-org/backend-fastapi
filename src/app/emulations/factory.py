@@ -4,12 +4,12 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from uuid import uuid4, UUID
 
-from src.app.core.db.mongo_layer import MongoDBDatabaseLayer
-from src.app.emulations.interfaces import EmuInterface
-from src.app.emulations.qemu import QEMU
-from src.app.emulations.types import EmuType
-from src.app.service.os import OSService
-from src.app.emulations.list_emu import ListEmuSingleton
+from app.core.db.mongo_layer import MongoDBDatabaseLayer
+from app.emulations.interfaces import EmuInterface
+from app.emulations.qemu import QEMU
+from app.emulations.types import EmuType
+from app.service.os import OSService
+from app.emulations.list_emu import ListEmuSingleton
 
 
 class EmuFactory(ABC):  # pylint: disable=R0903

@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from src.app.schemas.mixins import IDModelMixin
+from app.schemas.mixins import IDModelMixin
 
 
 class User(BaseModel):

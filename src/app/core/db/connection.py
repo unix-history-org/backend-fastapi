@@ -1,7 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from src.settings import settings
-from src.app.core.db.mongodb import db
+from settings import settings
+from app.core.db.mongodb import db
 
 
 async def connect() -> None:

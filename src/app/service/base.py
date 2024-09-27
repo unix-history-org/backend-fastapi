@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from src.app.core.db.base_layer import AbstractDatabaseLayer
+from app.core.db.base_layer import AbstractDatabaseLayer
 
 
 class BaseService(ABC):

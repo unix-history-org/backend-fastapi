@@ -2,11 +2,11 @@ from typing import Optional, List
 
 from fastapi import APIRouter, Cookie
 
-from src.app.core.db.mongo_layer import MongoDBDatabaseLayer
-from src.app.schemas.users import UserAdminResponse
-from src.app.schemas.base import MongoID
-from src.app.service.user import UserService
-from src.utils.tokens import check_token
+from app.core.db.mongo_layer import MongoDBDatabaseLayer
+from app.schemas.users import UserAdminResponse
+from app.schemas.base import MongoID
+from app.service.user import UserService
+from utils.tokens import check_token
 
 router = APIRouter(prefix="/api/admin/user")
 

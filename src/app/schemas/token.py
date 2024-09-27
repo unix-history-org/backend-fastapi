@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from src.app.schemas.base import MongoID
+from app.schemas.base import MongoID
 
 
 class Token(BaseModel):

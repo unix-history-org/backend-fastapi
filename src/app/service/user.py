@@ -1,9 +1,9 @@
 from typing import Optional, Tuple
 
-from src.app.core.db.base_layer import AbstractDatabaseLayer
-from src.app.service.base import BaseService
-from src.app.service.mixins import ServiceCRUDMixin
-from src.cryptography.cryptography import Crypto
+from app.core.db.base_layer import AbstractDatabaseLayer
+from app.service.base import BaseService
+from app.service.mixins import ServiceCRUDMixin
+from cryptography.cryptography import Crypto
 
 
 class UserService(ServiceCRUDMixin, BaseService):

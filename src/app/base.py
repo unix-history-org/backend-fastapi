@@ -1,14 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.app.api.admin.users import router as admin_user_router
-from src.app.api.admin.os import router as admin_os_router
-from src.app.api.os import router as os_router
-from src.app.api.users import router as user_router
-from src.app.api.emulation import router as emulation_router
+from app.api.admin.users import router as admin_user_router
+from app.api.admin.os import router as admin_os_router
+from app.api.os import router as os_router
+from app.api.users import router as user_router
+from app.api.emulation import router as emulation_router
 
-from src.settings import settings
-from src.app.core.db.connection import connect, disconnect
+from settings import settings
+from app.core.db.connection import connect, disconnect
 
 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)

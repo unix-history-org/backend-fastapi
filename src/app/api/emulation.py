@@ -5,11 +5,11 @@ from fastapi import APIRouter, WebSocket, HTTPException
 from starlette.websockets import WebSocketDisconnect
 from websockets import ConnectionClosed
 
-from src.app.schemas.emulation import Emulation
-from src.app.schemas.base import MongoID
-from src.app.emulations.factory import get_emu
-from src.utils.sockets import manager
-from src.utils.stoppable_thread import StoppableThread
+from app.schemas.emulation import Emulation
+from app.schemas.base import MongoID
+from app.emulations.factory import get_emu
+from utils.sockets import manager
+from utils.stoppable_thread import StoppableThread
 
 router = APIRouter(prefix="/api/emu")
 
