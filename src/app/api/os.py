@@ -7,7 +7,7 @@ from app.schemas.os import OSResponse
 from app.schemas.base import MongoID
 from app.service.os import OSService
 
-router = APIRouter(prefix="/api/os")
+router = APIRouter(prefix="/api/os", tags=["os"])
 
 
 @router.get("/", response_model=List[OSResponse], status_code=200)
