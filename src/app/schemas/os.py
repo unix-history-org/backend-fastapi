@@ -3,7 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field, HttpUrl
 
 from app.schemas.base import MongoID
-from app.schemas.images import Images
+from app.schemas.images import Images, HttpUrlString
 from app.schemas.mixins import IDModelMixin
 from app.emulations.types import EmuType
 
@@ -17,7 +17,7 @@ class OS(BaseModel):
     terminal_enable: bool = Field(alias="terminalEnable")
     graphics_enable: bool = Field(alias="graphicsEnable")
     photos: Optional[List[Images]] = Field(default=None)
-    main_photo: Optional[HttpUrl] = Field(alias="mainPhoto", default=None)
+    main_photo: Optional[HttpUrlString] = Field(alias="mainPhoto", default=None)
     parent_id: Optional[List[MongoID]] = Field(alias="parentId", default=None)
     child_id: Optional[List[MongoID]] = Field(alias="childId", default=None)
     is_free: bool = Field(alias="isFree")
