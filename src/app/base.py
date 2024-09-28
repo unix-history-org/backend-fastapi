@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.responses import RedirectResponse
 
 from app.api.admin.users import router as admin_user_router
 from app.api.admin.os import router as admin_os_router
@@ -11,7 +12,13 @@ from settings import settings
 from app.core.db.connection import connect, disconnect
 
 
-app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    version=settings.VERSION,
+    openapi_url="/api/doc/openapi.json",
+    docs_url="/api/doc/docs",
+    redoc_url="/api/doc/redoc",
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -26,6 +33,11 @@ app.include_router(admin_user_router)
 app.include_router(os_router)
 app.include_router(user_router)
 app.include_router(emulation_router)
+
+
+@app.get("/docs", response_class=RedirectResponse, include_in_schema=False)
+async def doc():
+    return "/api/doc/docs"
 
 
 @app.on_event("startup")

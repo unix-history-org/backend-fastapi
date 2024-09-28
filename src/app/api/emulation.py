@@ -11,7 +11,7 @@ from app.emulations.factory import get_emu
 from utils.sockets import manager
 from utils.stoppable_thread import StoppableThread
 
-router = APIRouter(prefix="/api/emu")
+router = APIRouter(prefix="/api/emu", tags=["emulation"])
 
 
 @router.get("/start/{os_id}", response_model=Emulation, status_code=200)

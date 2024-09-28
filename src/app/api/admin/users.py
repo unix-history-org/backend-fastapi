@@ -8,7 +8,7 @@ from app.schemas.base import MongoID
 from app.service.user import UserService
 from utils.tokens import check_token
 
-router = APIRouter(prefix="/api/admin/user")
+router = APIRouter(prefix="/api/admin/user", tags=["admin user"])
 
 
 @router.post(

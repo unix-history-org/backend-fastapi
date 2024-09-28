@@ -7,7 +7,7 @@ from app.core.db.mongo_layer import MongoDBDatabaseLayer
 from app.schemas.users import UserResponse, UserCreation
 from app.service.user import UserService
 
-router = APIRouter(prefix="/api/user")
+router = APIRouter(prefix="/api/user", tags=["user"])
 
 
 def get_service():

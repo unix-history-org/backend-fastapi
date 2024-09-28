@@ -9,7 +9,7 @@ from app.service.os import OSService
 from utils.tokens import check_token
 
 
-router = APIRouter(prefix="/api/admin/os")
+router = APIRouter(prefix="/api/admin/os", tags=["admin os"])
 
 
 @router.get("/{os_id}", response_model=OSAdmin, status_code=200)
