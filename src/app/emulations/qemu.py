@@ -116,9 +116,11 @@ class QEMU(EmuInterface):  # pylint: disable=R0902
     _gui_helper_output_queue: Optional[asyncio.Queue] = None
 
     def __init__(self, os_from_db: dict, emu_id: Optional[UUID]) -> None:
+        self._tmp_dir_name = "/tmp/unix-history"
         self._uuid = emu_id
         self._os = os_from_db
 
+        self._create_tmp_dir()
         self._make_fifo()
         self._copy_disk()
         self._vnc_port = self._get_next_port()
@@ -249,7 +251,7 @@ class QEMU(EmuInterface):  # pylint: disable=R0902
         )
 
     def _make_fifo(self) -> None:
-        self._fifo_name = f"/tmp/unix-history/{self._uuid}"
+        self._fifo_name = f"{self._tmp_dir_name}/{self._uuid}"
         try:
             os.remove(self._fifo_name + ".in")
             os.remove(self._fifo_name + ".out")
@@ -260,7 +262,7 @@ class QEMU(EmuInterface):  # pylint: disable=R0902
 
     def _copy_disk(self) -> None:
         self._disk_path = (
-            "/tmp/unix-history/"
+            f"{self._tmp_dir_name}"
             f"{self._replace_os_name(self._os['name'])}"
             f"_{self._uuid}.img"
         )
@@ -304,6 +306,9 @@ class QEMU(EmuInterface):  # pylint: disable=R0902
         self._reading = False
         if self._vnc_port in self._used_port:
             self._used_port.remove(self._vnc_port)
+
+    def _create_tmp_dir(self):
+        os.makedirs(self._tmp_dir_name, exist_ok=True)
 
     @classmethod
     def _get_next_port(cls) -> int:
