@@ -1,14 +1,14 @@
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, AnyUrl, Field
+from pydantic import BaseModel, Field
 
 from app.emulations.types import GraphicalTypes
 
 
 class Emulation(BaseModel):
-    terminal: Optional[AnyUrl] = Field(default=None)
-    graphical: Optional[AnyUrl] = Field(default=None)
+    terminal: Optional[str] = Field(default=None)
+    graphical: Optional[str] = Field(default=None)
     graphical_type: Optional[GraphicalTypes] = Field(
         alias="graphicalType", default=None
     )
