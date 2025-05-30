@@ -151,14 +151,12 @@ class QEMU(EmuInterface):  # pylint: disable=R0902
         ret = {"emulation_id": self.get_id()}
         if self._os["terminal_enable"]:
             ret |= {
-                "terminal": f"{settings.WEBSOCKET_TYPE}://{settings.BASE_URL}/"
-                f"api/emu/{self._os['id']}/{self.get_id()}/cli"
+                "terminal": f"api/emu/{self._os['id']}/{self.get_id()}/cli"
             }
         if self._os["graphics_enable"]:
             # INFO: PROXYING ON NGINX SIDE
             ret |= {
-                "graphical": f"{settings.WEBSOCKET_TYPE}://{settings.BASE_URL}/"
-                f"api/emu/{self._os['id']}/{self.get_id()}/gui"
+                "graphical": f"api/emu/{self._os['id']}/{self.get_id()}/gui"
             }
             ret |= {"graphical_type": GraphicalTypes.IFRAME}
         return ret
