@@ -32,7 +32,6 @@ async def stop_os(emu_id: UUID) -> bool:
 
 @router.websocket("/{os_id}/{emu_id}/cli")
 async def cli_ws(websocket: WebSocket, os_id: str, emu_id: UUID) -> None:
-    print(f"websocket {os_id}/{emu_id}/cli")
     await manager.connect(websocket)
     emu = await get_emu(os_id, emulations_type="cli", emu_id=emu_id)
 
@@ -65,7 +64,6 @@ async def cli_ws(websocket: WebSocket, os_id: str, emu_id: UUID) -> None:
 
 @router.websocket("/{os_id}/{emu_id}/gui")
 async def gui_ws(websocket: WebSocket, os_id: str, emu_id: UUID) -> None:
-    print(f"websocket {os_id}/{emu_id}/gui")
     await manager.connect(websocket)
     emu = await get_emu(os_id, emulations_type="gui", emu_id=emu_id)
 
