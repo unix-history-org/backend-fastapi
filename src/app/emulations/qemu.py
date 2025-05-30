@@ -262,7 +262,7 @@ class QEMU(EmuInterface):  # pylint: disable=R0902
 
     def _copy_disk(self) -> None:
         self._disk_path = (
-            f"{self._tmp_dir_name}"
+            f"{self._tmp_dir_name}/"
             f"{self._replace_os_name(self._os['name'])}"
             f"_{self._uuid}.img"
         )
