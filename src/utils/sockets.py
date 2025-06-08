@@ -30,6 +30,7 @@ class ConnectionManager:
 
     @staticmethod
     async def write_gui_to_socket(emu: EmuInterface, websocket: WebSocket):
+        await websocket.send_bytes(b'')
         while True:
             response = await emu.receive_gui()
             if response is not None:
